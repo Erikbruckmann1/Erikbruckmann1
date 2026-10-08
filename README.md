@@ -1,3 +1,15 @@
+# Hi there, I'm Erik! 👋
+
+👨‍💻 **Erik Bruckmann Soares | Software Engineering Undergraduate at Unipampa**
+
+---
+
+### 🌐 About me
+
+<details>
+<summary>🇧🇷 <b>Clique aqui para ler</b></summary>
+<br>
+
 Estudante de Engenharia de Software na Universidade Federal do Pampa (Unipampa). Na faculdade, venho trabalhando principalmente com **Java**: orientação a objetos, interfaces gráficas com Swing e programação concorrente com threads e semáforos.
 
 Também tenho me aprofundado em **Engenharia de Software Seguro**, com modelagem de ameaças (STRIDE), análise de riscos (NIST CSF 2.0), requisitos de código seguro (OWASP ASVS) e verificação de vulnerabilidades com o OWASP ZAP.
