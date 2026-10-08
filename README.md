@@ -60,5 +60,4 @@ Before that, I got started in web development with HTML, CSS and JavaScript, con
 ### 📫 Contact
 
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/erik-br%C3%BCckmann-5a7716263)
-)
 [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:eriksoares.aluno@unipampa.edu.br)
