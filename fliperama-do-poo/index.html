@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Quiz gamificado para a Prova 1 de POO em Java: 83 questões com explicação, combo, recorde e modo sobrevivência.">
+<meta name="theme-color" content="#E76F00">
+<style>
+  :root{ padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html,body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none !important}
+</style>
+<title>Fliperama do POO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bungee&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: coluna única sobre papel quadriculado; cada questão é uma "caixa de classe" UML (nome / corpo / métodos). Telas: menu → jogo → resultado. */
+:root{
+  --paper:#EDF1F6; --grid:#DCE3EC; --card:#FFFFFF; --card-2:#F4F6FA;
+  --ink:#16213A; --soft:#56627A; --edge:#16213A;
+  --java:#E76F00; --java-soft:#FDE6D0; --on-java:#1B1206;
+  --blue:#2F6797; --blue-soft:#DDE8F3;
+  --gold:#FFC23D; --gold-soft:#FFF1CC;
+  --ok:#17894F; --ok-soft:#D8F1E3;
+  --bad:#C92F42; --bad-soft:#FBE1E4;
+  --code-bg:#16213A; --code-fg:#E4EBF5; --code-kw:#FF9E4A; --code-str:#A6DD8F; --code-com:#8C9AB3; --code-tipo:#8CC8FF;
+  --disp:"Bungee", Impact, "Arial Black", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1424; --grid:#152037; --card:#172238; --card-2:#1D2A44;
+    --ink:#E7EDF7; --soft:#9DAAC3; --edge:#02050C;
+    --java:#FF8A2A; --java-soft:#3A2412; --on-java:#1B1206;
+    --blue:#86B6E2; --blue-soft:#1C2D47;
+    --gold:#FFC23D; --gold-soft:#3A3014;
+    --ok:#4CCF8E; --ok-soft:#123628;
+    --bad:#FF7383; --bad-soft:#3E1B25;
+    --code-bg:#080D18; --code-fg:#E4EBF5; --code-kw:#FF9E4A; --code-str:#A6DD8F; --code-com:#7F8CA5; --code-tipo:#8CC8FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1424; --grid:#152037; --card:#172238; --card-2:#1D2A44;
+  --ink:#E7EDF7; --soft:#9DAAC3; --edge:#02050C;
+  --java:#FF8A2A; --java-soft:#3A2412; --on-java:#1B1206;
+  --blue:#86B6E2; --blue-soft:#1C2D47;
+  --gold:#FFC23D; --gold-soft:#3A3014;
+  --ok:#4CCF8E; --ok-soft:#123628;
+  --bad:#FF7383; --bad-soft:#3E1B25;
+  --code-bg:#080D18; --code-fg:#E4EBF5; --code-kw:#FF9E4A; --code-str:#A6DD8F; --code-com:#7F8CA5; --code-tipo:#8CC8FF;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; padding-inline:16px; min-height:100vh;
+  font-family:var(--body); font-size:17px; line-height:1.5; color:var(--ink);
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  -webkit-font-smoothing:antialiased;
+}
+button,select{font:inherit; color:inherit}
+button{cursor:pointer}
+button:focus-visible, select:focus-visible{outline:3px solid var(--java); outline-offset:3px}
+code{font-family:var(--mono); font-size:.88em; background:var(--card-2); border:1px solid var(--grid); padding:.05em .35em; border-radius:5px; overflow-wrap:anywhere}
+
+.app{max-width:760px; margin:0 auto; padding-block:20px 56px; display:flex; flex-direction:column; gap:18px}
+
+/* ---------- botões ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--java); color:var(--on-java); font-weight:700; font-size:1.08rem;
+  padding:12px 22px; border-radius:999px; border:3px solid var(--edge); box-shadow:0 5px 0 var(--edge);
+  transition:transform .08s, box-shadow .08s;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--edge)}
+.btn.ghost{background:var(--card); color:var(--ink)}
+.mini{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--mono); font-size:.78rem; font-weight:600; letter-spacing:.02em;
+  background:var(--card); border:2px solid var(--edge); border-radius:999px; padding:5px 12px;
+  box-shadow:0 3px 0 var(--edge);
+}
+.mini:active{transform:translateY(2px); box-shadow:0 1px 0 var(--edge)}
+
+/* ---------- menu ---------- */
+.topo{display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding-top:8px}
+.logo{margin:0; font-family:var(--disp); font-weight:400; line-height:.92; display:flex; flex-direction:column; align-items:center; transform:rotate(-2deg)}
+.logo .l1{font-size:clamp(2.1rem, 9vw, 3.4rem); color:var(--java); text-shadow:0 4px 0 var(--edge)}
+.logo .l2{font-size:clamp(1.3rem, 5.5vw, 2rem); color:var(--ink)}
+.logo .l2 b{font-weight:400; color:var(--blue)}
+.sub{margin:0; max-width:52ch; color:var(--soft); text-wrap:balance}
+.ferramentas{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center}
+.ferramentas label{font-family:var(--mono); font-size:.78rem; font-weight:600; color:var(--soft); text-transform:uppercase; letter-spacing:.08em}
+select{background:var(--card); border:2px solid var(--edge); border-radius:999px; padding:5px 12px; font-family:var(--mono); font-size:.8rem; font-weight:600; box-shadow:0 3px 0 var(--edge); max-width:100%}
+
+.modos{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px}
+@media (max-width:620px){ .modos{grid-template-columns:minmax(0,1fr)} }
+.modo{
+  display:flex; flex-direction:column; text-align:left; padding:0; overflow:hidden;
+  background:var(--card); border:3px solid var(--edge); border-radius:18px; box-shadow:0 6px 0 var(--edge);
+  transition:transform .08s, box-shadow .08s;
+}
+.modo:not(:disabled):active{transform:translateY(4px); box-shadow:0 2px 0 var(--edge)}
+.modo:disabled{opacity:.5; cursor:not-allowed}
+.modo.destaque{grid-column:1 / -1}
+.modo-nome{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:12px 16px; border-bottom:3px solid var(--edge); background:var(--tint)}
+.modo-nome b{font-family:var(--disp); font-weight:400; font-size:1.15rem; line-height:1.1}
+.modo-nome small{font-family:var(--mono); font-size:.72rem; font-weight:600; color:var(--soft); white-space:nowrap}
+.modo-desc{padding:12px 16px 4px; color:var(--soft); font-size:.97rem; line-height:1.4}
+.modo-meta{display:flex; flex-wrap:wrap; gap:6px 14px; padding:6px 16px 14px; font-family:var(--mono); font-size:.76rem; font-weight:600; font-variant-numeric:tabular-nums}
+.modo-meta span{display:inline-flex; gap:5px; align-items:center}
+.rodape{margin:0; text-align:center; font-family:var(--mono); font-size:.75rem; color:var(--soft)}
+.rodape kbd{font-family:var(--mono); background:var(--card); border:1.5px solid var(--edge); border-bottom-width:3px; border-radius:5px; padding:0 5px}
+
+/* ---------- HUD ---------- */
+.hud-wrap{position:sticky; top:env(safe-area-inset-top, 0px); z-index:10; background:var(--paper); padding-block:10px 8px; margin-block:-10px 0; display:flex; flex-direction:column; gap:8px}
+.hud{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.hud-info{display:flex; flex-direction:column; line-height:1.15; min-width:0; flex:1}
+.hud-info b{font-family:var(--disp); font-weight:400; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hud-info span{font-family:var(--mono); font-size:.75rem; color:var(--soft); font-variant-numeric:tabular-nums}
+.hud-dir{display:flex; align-items:center; gap:10px}
+.cafes{display:flex; gap:2px}
+.cafe{width:24px; height:24px; color:var(--java)}
+.cafe.perdido{color:var(--soft); opacity:.3}
+.combo{font-family:var(--mono); font-weight:600; font-size:.8rem; padding:2px 8px; border-radius:999px; border:2px solid var(--edge); background:var(--card-2); color:var(--soft)}
+.combo.on{background:var(--gold); color:#1B1206}
+.pontos{font-family:var(--disp); font-size:1.5rem; line-height:1; min-width:3ch; text-align:right; font-variant-numeric:tabular-nums}
+.pontos.bump{animation:bump .35s}
+@keyframes bump{40%{transform:scale(1.3); color:var(--java)}}
+.trilho{height:8px; border-radius:99px; background:var(--card); border:2px solid var(--edge); overflow:hidden}
+.trilho i{display:block; height:100%; background:var(--blue); transition:width .3s}
+.tempo{display:flex; align-items:center; gap:8px}
+.tempo .barra{flex:1; height:8px; border-radius:99px; background:var(--card); border:2px solid var(--edge); overflow:hidden}
+.tempo .barra i{display:block; height:100%; width:100%; background:var(--ok)}
+.tempo .barra i.urgente{background:var(--bad)}
+.tempo span{font-family:var(--mono); font-size:.78rem; font-weight:600; min-width:4ch; text-align:right; font-variant-numeric:tabular-nums}
+
+/* ---------- caixa UML ---------- */
+.uml{background:var(--card); border:3px solid var(--edge); border-radius:16px; box-shadow:0 6px 0 var(--edge); overflow:hidden}
+.uml-nome{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 18px; border-bottom:3px solid var(--edge); background:var(--blue-soft)}
+.uml-nome .estereo{font-family:var(--mono); font-size:.8rem; font-weight:600; color:var(--blue)}
+.uml-nome h2{margin:0; font-family:var(--disp); font-weight:400; font-size:1.05rem; line-height:1.2}
+.chip{font-family:var(--mono); font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; padding:2px 8px; border-radius:999px; border:2px solid var(--edge); background:var(--card)}
+.chip.prof{background:var(--java-soft)}
+.uml-corpo{padding:18px; display:flex; flex-direction:column; gap:14px; border-bottom:3px solid var(--edge)}
+.enunciado{margin:0; font-size:1.18rem; font-weight:700; line-height:1.4; text-wrap:pretty}
+pre.codigo{margin:0; background:var(--code-bg); color:var(--code-fg); border-radius:10px; padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:.86rem; line-height:1.55; tab-size:4}
+pre.codigo code{background:none; border:0; padding:0; font-size:inherit; color:inherit; overflow-wrap:normal}
+.c-kw{color:var(--code-kw); font-weight:600}
+.c-str{color:var(--code-str)}
+.c-com{color:var(--code-com); font-style:italic}
+.c-tipo{color:var(--code-tipo)}
+
+.opcoes{list-style:none; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px}
+.op{
+  width:100%; display:flex; align-items:flex-start; gap:12px; text-align:left;
+  background:var(--card); border:2px solid var(--edge); border-radius:12px; padding:10px 12px;
+  box-shadow:0 3px 0 var(--edge); transition:transform .08s, box-shadow .08s, background .15s;
+}
+.op .txt{min-width:0; padding-top:3px}
+.op:not(:disabled):hover{background:var(--card-2)}
+.op:not(:disabled):active{transform:translateY(2px); box-shadow:0 1px 0 var(--edge)}
+.op:disabled{cursor:default}
+.letra{flex:none; width:32px; height:32px; display:grid; place-items:center; border-radius:8px; border:2px solid var(--edge); font-family:var(--mono); font-weight:600; background:var(--card-2)}
+.op.certa{background:var(--ok-soft); border-color:var(--ok); box-shadow:0 3px 0 var(--ok)}
+.op.certa .letra{background:var(--ok); color:var(--card); border-color:var(--ok)}
+.op.errada{background:var(--bad-soft); border-color:var(--bad); box-shadow:0 3px 0 var(--bad)}
+.op.errada .letra{background:var(--bad); color:var(--card); border-color:var(--bad)}
+.op.apagada{opacity:.5}
+.q.acertou .op.certa{animation:pop .35s}
+.q.errou{animation:shake .4s}
+@keyframes pop{50%{transform:scale(1.03)}}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* ---------- saída do "compilador" ---------- */
+.saida{display:flex; flex-direction:column; gap:14px}
+.console{background:var(--code-bg); color:var(--code-fg); border:3px solid var(--edge); border-radius:14px; padding:14px 16px; font-family:var(--mono); font-size:.85rem; line-height:1.6; overflow-x:auto}
+.console .prompt{color:var(--code-com)}
+.console .verde{color:#5BE39B; font-weight:600}
+.console .vermelho{color:#FF7A89; font-weight:600}
+.console .dica{color:var(--code-fg); white-space:pre-wrap}
+.porque{background:var(--card); border:3px solid var(--edge); border-radius:14px; padding:14px 18px}
+.porque h3{margin:0 0 4px; font-family:var(--mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--soft)}
+.porque p{margin:0; max-width:68ch}
+.saida .btn{align-self:flex-end}
+
+/* ---------- resultado ---------- */
+.fim .uml-nome{background:var(--gold-soft)}
+.fim .uml-corpo{align-items:center; text-align:center; border-bottom:0}
+.rank-label{margin:0; font-family:var(--mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--soft)}
+.rank{margin:0; font-family:var(--disp); font-size:clamp(1.3rem, 5vw, 1.8rem); line-height:1.15; color:var(--java); text-wrap:balance}
+.placar{margin:0; font-family:var(--disp); font-size:clamp(2.6rem, 12vw, 4rem); line-height:1; font-variant-numeric:tabular-nums}
+.placar small{font-size:.35em; color:var(--soft)}
+.novo{display:inline-block; background:var(--gold); color:#1B1206; font-weight:700; padding:2px 12px; border-radius:999px; border:2px solid var(--edge); transform:rotate(-2deg)}
+.stats{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin:6px 0 0; width:100%}
+@media (max-width:520px){ .stats{grid-template-columns:repeat(2, minmax(0,1fr))} }
+.stats div{background:var(--card-2); border:2px solid var(--edge); border-radius:12px; padding:8px}
+.stats dt{font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--soft)}
+.stats dd{margin:0; font-family:var(--disp); font-size:1.3rem; font-variant-numeric:tabular-nums}
+.painel{background:var(--card); border:3px solid var(--edge); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:10px}
+.painel h3{margin:0; font-family:var(--disp); font-weight:400; font-size:1rem}
+.temas{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+.temas li{display:grid; grid-template-columns:minmax(0,9.5rem) minmax(0,1fr) 3.5rem; gap:10px; align-items:center; font-size:.92rem}
+.temas .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.temas .bar{height:12px; border-radius:99px; background:var(--card-2); border:2px solid var(--edge); overflow:hidden}
+.temas .bar i{display:block; height:100%}
+.temas .v{font-family:var(--mono); font-size:.78rem; text-align:right; font-variant-numeric:tabular-nums}
+@media (max-width:420px){ .temas li{grid-template-columns:minmax(0,7rem) minmax(0,1fr) 3.2rem} }
+.revisao{display:flex; flex-direction:column; gap:8px}
+.revisao details{border:2px solid var(--edge); border-radius:12px; background:var(--card-2)}
+.revisao summary{cursor:pointer; padding:10px 12px; font-weight:700}
+.revisao .det{padding:0 12px 12px; display:flex; flex-direction:column; gap:8px}
+.revisao .det p{margin:0}
+.revisao .certo{color:var(--ok); font-weight:700}
+.vazio{margin:0; color:var(--soft)}
+.acoes{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ---------- banco de questões ----------
+// a[0] é sempre a alternativa correta; a ordem é embaralhada na hora de mostrar.
+const QUESTOES = [
+  // Lista do professor (Aula de Revisão, Prova 1)
+  {id:'p1', t:'Herança', o:'prof', q:'Em Java, qual limitação se aplica à herança entre classes?',
+   a:['Uma classe pode estender apenas uma classe diretamente.','Uma classe pode implementar somente uma interface diretamente.','Uma classe pode declarar somente uma subclasse diretamente.','Uma classe pode possuir somente um construtor declarado.'],
+   e:'Java só tem herança simples de classes: `extends` aceita uma única superclasse. Interfaces podem ser várias (`implements A, B`), e não há limite de subclasses nem de construtores.'},
+  {id:'p2', t:'Herança', o:'prof', q:'Ao tentar sobrescrever um método `final` herdado em Java, o que ocorre?',
+   a:['O compilador rejeita a redefinição do método na subclasse.','O compilador aceita uma sobrecarga com outros parâmetros.','A chamada utiliza o método herdado se não houver sobrescrita.','O método herdado pode ser chamado por meio de super.'],
+   e:'Método `final` não pode ser sobrescrito: redefini-lo com a mesma assinatura dá erro de compilação. As outras frases descrevem coisas possíveis, mas não o que acontece na tentativa de sobrescrever.'},
+  {id:'p3', t:'Polimorfismo', o:'prof', q:'Uma variável do tipo `Animal` referencia um `Cachorro` que sobrescreve `emitirSom()`. Qual implementação é executada?',
+   a:['A implementação de Cachorro, conforme o objeto real.','A implementação de Animal, conforme o tipo declarado.','A sobrecarga de emitirSom com parâmetros compatíveis.','O construtor de Cachorro, usado na criação do objeto.'],
+   e:'Ligação dinâmica: a versão executada depende do objeto real em tempo de execução (`Cachorro`). O tipo declarado (`Animal`) só define quais métodos o compilador deixa você chamar.'},
+  {id:'p4', t:'Polimorfismo', o:'prof', q:'Qual situação demonstra polimorfismo por sobrescrita?',
+   a:['Duas subclasses implementam o mesmo método herdado de formas distintas.','Uma classe declara métodos de mesmo nome com parâmetros diferentes.','Uma classe oculta seus atributos e expõe métodos para alterá-los.','Uma classe delega operações a objetos mantidos como atributos.'],
+   e:'Sobrescrita é a subclasse redefinir um método herdado com a mesma assinatura. Mesmo nome com parâmetros diferentes é sobrecarga; esconder atributos é encapsulamento; delegar a atributos é composição.'},
+  {id:'p5', t:'Pilares', o:'prof', q:'Qual associação entre princípio de POO e finalidade está correta?',
+   a:['Encapsulamento controla o acesso; herança especializa; polimorfismo varia comportamentos.','Abstração seleciona detalhes relevantes; composição delega; sobrecarga varia parâmetros.','Herança reutiliza contratos; composição agrupa objetos; abstração oculta detalhes.','Encapsulamento restringe estado; associação conecta objetos; interface define contratos.'],
+   e:'A correta liga três pilares de POO às suas finalidades centrais. As outras misturam itens que não são pilares (sobrecarga, associação, interface) ou trocam papéis: quem oculta detalhes de implementação é o encapsulamento.'},
+  {id:'p6', t:'Pilares', o:'prof', q:'Um `Pedido` mantém itens privados, um `PedidoExpresso` especializa `Pedido` e ambos `calculamFrete()` diferentemente. O que cada recurso representa?',
+   a:['Encapsulamento, herança e polimorfismo, respectivamente.','Abstração, composição e sobrecarga, respectivamente.','Encapsulamento, composição e delegação, respectivamente.','Associação, herança e sobrecarga, respectivamente.'],
+   e:'Itens `private`: encapsulamento. `PedidoExpresso extends Pedido`: herança. Cada um com seu próprio `calcularFrete()`: polimorfismo por sobrescrita.'},
+  {id:'p7', t:'Construtores', o:'prof', q:'Por que uma classe pode oferecer dois construtores com assinaturas distintas?',
+   a:['Para permitir formas diferentes de inicializar objetos válidos.','Para permitir formas diferentes de chamar métodos estáticos.','Para permitir formas diferentes de sobrescrever métodos herdados.','Para permitir formas diferentes de acessar atributos privados.'],
+   e:'É sobrecarga de construtores: cada assinatura é um jeito de criar o objeto já consistente, por exemplo `Conta(titular)` e `Conta(titular, saldoInicial)`.'},
+  {id:'p8', t:'Construtores', o:'prof', q:'Qual é uma boa responsabilidade do construtor de uma classe `Conta`?',
+   a:['Estabelecer o estado inicial válido exigido pela classe.','Determinar qual método sobrescrito executar em runtime.','Centralizar a apresentação de mensagens na interface.','Definir contratos que todas as subclasses devem cumprir.'],
+   e:'O construtor garante que o objeto nasce consistente (titular informado, saldo inicial não negativo). Escolher o método em runtime é trabalho da JVM, mensagens são da interface gráfica e contratos vêm de interfaces ou classes abstratas.'},
+  {id:'p9', t:'static e final', o:'prof', q:'Qual diferença caracteriza um método `static` em Java?',
+   a:['Pertence à classe e não depende de uma instância para ser chamado.','Pertence ao objeto e pode acessar diretamente seu estado privado.','Pode ser sobrescrito dinamicamente por cada subclasse concreta.','É executado automaticamente ao construir qualquer objeto.'],
+   e:'Métodos `static` são da classe: chama-se `Math.max(a, b)` sem criar objeto. Eles não acessam atributos de instância diretamente e não participam da sobrescrita polimórfica.'},
+  {id:'p10', t:'static e final', o:'prof', q:'Um método `static` tenta usar diretamente `this.saldo`. Qual é o problema?',
+   a:['Não existe referência this no contexto estático do método.','O acesso a atributos privados requer sempre métodos get.','O uso de this é reservado exclusivamente aos construtores.','O modificador static impede receber argumentos por parâmetro.'],
+   e:'Num método `static` não existe objeto corrente, então não há `this`. O compilador acusa "non-static variable cannot be referenced from a static context".'},
+  {id:'p11', t:'Coesão', o:'prof', q:'Uma classe `Cadastro` gera relatórios, calcula impostos e autentica usuários. Qual refatoração é mais coerente?',
+   a:['Distribuir funções entre classes com responsabilidades coesas.','Agrupar funções em uma superclasse para herança generalizada.','Mover funções para métodos static de uma classe utilitária.','Criar sobrecargas dos métodos para cada tipo de usuário.'],
+   e:'São três motivos diferentes para mudar. Separe em classes coesas (`GeradorRelatorio`, `CalculadoraImpostos`, `Autenticador`). Jogar tudo em `static` ou numa superclasse só muda a bagunça de lugar.'},
+  {id:'p12', t:'Coesão', o:'prof', q:'Qual pergunta ajuda a aplicar o princípio da responsabilidade única?',
+   a:['Quais mudanças do sistema justificariam alterar esta classe?','Quais subclasses poderiam herdar os atributos desta classe?','Quais construtores poderiam receber parâmetros opcionais?','Quais métodos poderiam tornar-se estáticos nesta classe?'],
+   e:'Responsabilidade única: uma classe deve ter um só motivo para mudar. Se mudanças fiscais e mudanças no layout do relatório mexem na mesma classe, ela acumula responsabilidades.'},
+  {id:'p13', t:'Encapsulamento', o:'prof', q:'Uma classe possui atributos `private`. Quando é adequado NÃO criar setter?',
+   a:['Quando a alteração irrestrita poderia violar invariantes do objeto.','Quando a leitura externa precisa passar por um método getter.','Quando subclasses precisam reutilizar uma operação herdada.','Quando métodos sobrecarregados precisam de parâmetros distintos.'],
+   e:'Invariantes são regras que o objeto deve sempre respeitar (por exemplo, saldo nunca negativo). Um setter livre permitiria quebrá-las; prefira operações com regra, como `depositar` e `sacar`.'},
+  {id:'p14', t:'Encapsulamento', o:'prof', q:'Em vez de `setSaldo(double)`, qual operação tende a preservar melhor as regras de `Conta`?',
+   a:['`sacar(valor)`, que valida saldo e limites antes da alteração.','`getSaldo()`, que consulta o valor atual sem modificá-lo.','`toString()`, que produz uma representação textual da conta.','`equals(outro)`, que compara a igualdade entre duas contas.'],
+   e:'`sacar(valor)` é uma operação do domínio que valida antes de mudar o estado. `setSaldo` deixaria qualquer código definir qualquer valor, e as outras opções nem alteram o saldo.'},
+  {id:'p15', t:'Composição', o:'prof', q:'Ao modelar `Motor` e `Carro`, qual relação normalmente faz mais sentido?',
+   a:['Composição: um Carro tem um Motor como parte de seu estado.','Herança: um Carro é uma especialização direta de Motor.','Implementação: um Carro cumpre o contrato da classe Motor.','Sobrescrita: um Carro redefine o comportamento do Motor.'],
+   e:'Carro "tem um" Motor; não "é um" Motor. Relação tem-um vira atributo: `private Motor motor;`.'},
+  {id:'p16', t:'Composição', o:'prof', q:'Qual critério prático favorece herança em lugar de composição?',
+   a:['Há relação é-um e a subclasse respeita o contrato da base.','Há relação tem-um e o objeto delega trabalho a um componente.','Há dependência temporária e o serviço recebe outro por parâmetro.','Há necessidade de compartilhar dados sem expor estado mutável.'],
+   e:'Herança só quando a subclasse "é um" tipo da base e pode substituí-la em qualquer lugar sem quebrar nada (Princípio de Substituição de Liskov). Tem-um é composição; receber por parâmetro é dependência.'},
+  {id:'p17', t:'Encapsulamento', o:'prof', q:'Por que declarar `saldo` como `private` em `Conta`?',
+   a:['Para controlar mudanças no estado por operações com validação.','Para permitir acesso direto ao campo a partir de subclasses.','Para escolher a implementação do método em tempo de execução.','Para garantir que o atributo seja compartilhado entre instâncias.'],
+   e:'Com `private`, só a própria classe mexe no saldo, sempre por métodos que validam. Subclasses também não enxergam `private` (isso seria `protected`), e compartilhar entre instâncias é `static`.'},
+  {id:'p18', t:'Encapsulamento', o:'prof', q:'Se um campo fosse `public`, qual risco de projeto seria introduzido?',
+   a:['Clientes poderiam alterar o valor sem respeitar regras do objeto.','Subclasses precisariam declarar construtores com super().','Chamadas polimórficas deixariam de usar despacho dinâmico.','Métodos estáticos passariam a exigir referência à instância.'],
+   e:'Campo `public` permite que qualquer código faça `conta.saldo = -1000`, pulando as validações. As regras do objeto deixam de ser garantidas.'},
+  {id:'p19', t:'Polimorfismo', o:'prof', q:'Como polimorfismo pode substituir condicionais por tipo em `calcularFrete()`?',
+   a:['Cada modalidade implementa o cálculo por um contrato comum.','Uma função central testa o tipo concreto antes de cada cálculo.','Uma classe utilitária recebe um código e seleciona o algoritmo.','Um construtor escolhe a modalidade e armazena sua categoria.'],
+   e:'Em vez de `if (tipo == EXPRESSO) ... else if ...`, cada modalidade (`FreteNormal`, `FreteExpresso`) implementa `calcular()` de uma interface comum. O cliente só chama `frete.calcular()`.'},
+  {id:'p20', t:'Polimorfismo', o:'prof', q:'Qual benefício de adicionar `Pix` a uma lista de formas de pagamento polimórficas?',
+   a:['O processamento comum pode funcionar sem conhecer o novo tipo.','O processamento comum passa a validar todos os tipos com if.','O processamento comum precisa criar uma sobrecarga para Pix.','O processamento comum deve converter cada objeto em Pix.'],
+   e:'O laço que chama `pagamento.pagar()` continua igual; `Pix` só precisa cumprir o contrato. É o princípio aberto/fechado: aberto para extensão, fechado para modificação.'},
+  {id:'p21', t:'Encapsulamento', o:'prof', q:'O que a restrição `private` oferece além de esconder um campo?',
+   a:['Permite preservar invariantes ao concentrar alterações em métodos.','Permite reutilizar implementação ao especializar uma superclasse.','Permite variar a implementação invocada segundo o tipo do objeto.','Permite combinar objetos para delegar operações entre componentes.'],
+   e:'Como toda alteração passa pelos métodos da própria classe, há um único lugar para verificar as regras. As outras opções descrevem herança, polimorfismo e composição.'},
+  {id:'p22', t:'Encapsulamento', o:'prof', q:'Qual mudança tende a ser mais segura quando clientes usam métodos em vez de campos públicos?',
+   a:['Alterar a representação interna mantendo o contrato público.','Alterar a hierarquia inteira mantendo os construtores privados.','Alterar o tipo dinâmico de todos os objetos em tempo de compilação.','Alterar todos os campos para static mantendo o acesso por instância.'],
+   e:'Se os clientes só usam `getSaldo()` e `sacar()`, dá para trocar `double` por `BigDecimal` por dentro sem quebrar ninguém. Com campo público, cada cliente depende do formato interno.'},
+  {id:'p23', t:'Herança', o:'prof', q:'Em um construtor de subclasse Java, para que serve `super(argumentos)`?',
+   a:['Invocar um construtor da superclasse com os argumentos dados.','Invocar um método sobrescrito da subclasse com os argumentos.','Criar um segundo objeto da subclasse com os argumentos dados.','Converter a referência atual ao tipo de uma interface herdada.'],
+   e:'`super(...)` roda o construtor da superclasse para inicializar a parte herdada do objeto. Precisa ser a primeira instrução do construtor.'},
+  {id:'p24', t:'Herança', o:'prof', q:'Dentro de um método sobrescrito, o que significa `super.executar()`?',
+   a:['Chamar a implementação herdada de executar na superclasse.','Chamar a implementação redefinida de executar na subclasse.','Chamar qualquer sobrecarga de executar escolhida em execução.','Chamar o construtor sem argumentos definido na superclasse.'],
+   e:'`super.metodo()` chama a versão da superclasse. Serve para estender o comportamento herdado em vez de substituí-lo por completo.'},
+  {id:'p25', t:'Abstração e interfaces', o:'prof', q:'Qual é a relação entre classe abstrata e instanciamento em Java?',
+   a:['Uma classe abstrata não pode ser instanciada diretamente.','Uma classe abstrata deve possuir apenas métodos abstratos.','Uma classe abstrata não pode implementar interfaces Java.','Uma classe abstrata deve possuir construtores públicos.'],
+   e:'`new Forma()` não compila se `Forma` é `abstract`. Ela pode ter métodos concretos, atributos, construtores (usados pelas subclasses via `super`) e implementar interfaces.'},
+  {id:'p26', t:'Abstração e interfaces', o:'prof', q:'Uma classe concreta herda um método abstrato e não o implementa. O que acontece?',
+   a:['Há erro de compilação: ela deve implementá-lo ou ser abstrata.','O método herdado recebe automaticamente um corpo vazio.','O método é ignorado quando o objeto não invoca sua operação.','O compilador transforma automaticamente o método em static.'],
+   e:'Toda classe concreta precisa implementar todos os métodos abstratos que herda. Se não implementar, ela mesma tem de ser declarada `abstract`.'},
+  {id:'p27', t:'Polimorfismo', o:'prof', q:'Uma coleção `List` contém `Circulo` e `Retangulo`. Qual desenho evita `instanceof` no cálculo de área?',
+   a:['Chamar `area()` em cada Forma, com implementações específicas.','Testar a classe de cada Forma e escolher a fórmula adequada.','Converter cada Forma no tipo concreto antes de calcular sua área.','Armazenar um identificador de tipo e consultar uma tabela.'],
+   e:'`for (Forma f : formas) total += f.area();` e o despacho dinâmico escolhe a fórmula de cada classe. `instanceof`, casts e códigos de tipo prendem o cliente aos tipos concretos.'},
+  {id:'p28', t:'Polimorfismo', o:'prof', q:'Qual vantagem arquitetural do despacho polimórfico em uma coleção heterogênea?',
+   a:['Reduz o acoplamento do cliente aos tipos concretos da coleção.','Centraliza a lógica dos tipos concretos em condicionais do cliente.','Exige registrar os tipos concretos em uma enumeração compartilhada.','Permite acessar diretamente os campos internos de qualquer objeto.'],
+   e:'O cliente depende só da abstração (`Forma`, `Pagamento`). Tipos novos entram sem alterar o cliente: baixo acoplamento.'},
+  {id:'p29', t:'Exceções', o:'prof', q:'Por que uma classe de domínio deve lançar uma exceção ao detectar saldo insuficiente?',
+   a:['Para sinalizar a violação sem decidir como a interface a exibirá.','Para registrar a mensagem diretamente no console da aplicação.','Para impedir que a camada de interface trate a falha ocorrida.','Para converter a validação em um método estático compartilhado.'],
+   e:'O domínio sabe que a regra foi violada; quem sabe mostrar isso ao usuário é a interface. Lançar exceção separa as duas coisas. Um `System.out.println` no domínio prenderia a regra a uma forma de exibição.'},
+  {id:'p30', t:'Exceções', o:'prof', q:'Em aplicação com interface gráfica e API, por que lançar `SaldoInsuficienteException` no domínio?',
+   a:['Cada interface pode tratar a mesma falha de maneira apropriada.','Cada interface precisa repetir as regras internas de validação.','O domínio passa a escolher entre JOptionPane e resposta HTTP.','O lançamento elimina a necessidade de tratar falhas na aplicação.'],
+   e:'A regra fica num lugar só, o domínio. A interface gráfica captura e mostra um `JOptionPane`; a API captura e devolve HTTP 400. Mesma falha, tratamentos diferentes.'},
+
+  // Questões extras
+  {id:'e1', t:'Construtores', o:'extra', q:'O que este código imprime?',
+   c:`class A {
+    A() { System.out.print("A"); }
+}
+class B extends A {
+    B() { System.out.print("B"); }
+}
+
+// no main:
+new B();`,
+   a:['AB','BA','B','Erro de compilação'],
+   e:'Todo construtor começa chamando `super()`, mesmo que você não escreva. O construtor de `A` roda antes do corpo de `B`, então imprime AB.'},
+  {id:'e2', t:'Construtores', o:'extra', q:'O que acontece ao compilar este código?',
+   c:`class Pessoa {
+    private String nome;
+    Pessoa(String nome) { this.nome = nome; }
+}
+class Aluno extends Pessoa {
+    Aluno() { }
+}`,
+   a:['Erro: Aluno precisa chamar super(nome), pois Pessoa não tem construtor vazio.','Compila, e o Aluno é criado com nome igual a null.','Compila, porque o Java gera um construtor vazio em Pessoa.','Compila, mas lança exceção ao executar new Aluno().'],
+   e:'`Aluno()` chama `super()` implicitamente, mas `Pessoa` só tem `Pessoa(String)`. Como a classe declarou um construtor, o Java não gera o vazio. Correção: `Aluno(String nome) { super(nome); }`.'},
+  {id:'e3', t:'Construtores', o:'extra', q:'A classe `Conta` declara apenas `Conta(String titular)`. O que acontece com `new Conta()`?',
+   a:['Erro de compilação: não existe construtor sem argumentos.','Compila e cria a conta com titular igual a null.','Compila e cria a conta com titular igual a "".','Compila, mas lança NullPointerException ao executar.'],
+   e:'O construtor padrão (sem argumentos) só é gerado automaticamente quando a classe não declara nenhum construtor. Declarou um, perdeu o padrão.'},
+  {id:'e4', t:'Construtores', o:'extra', q:'O que faz `this(titular, 0.0)` na primeira linha de um construtor?',
+   a:['Chama outro construtor da mesma classe, reaproveitando a inicialização.','Chama o construtor da superclasse com os dois argumentos.','Cria um novo objeto Conta e o atribui à variável this.','Atribui os dois valores aos dois primeiros atributos da classe.'],
+   e:'`this(...)` encadeia construtores da mesma classe e evita repetir validações. Assim como `super(...)`, precisa ser a primeira instrução, então os dois não aparecem juntos no mesmo construtor.'},
+  {id:'e5', t:'Sobrecarga', o:'extra', q:'Qual frase diferencia corretamente sobrecarga de sobrescrita?',
+   a:['Sobrecarga muda os parâmetros e é resolvida na compilação; sobrescrita mantém a assinatura e é resolvida na execução.','Sobrecarga mantém a assinatura na subclasse; sobrescrita muda os parâmetros na mesma classe.','Sobrecarga só existe entre classes da mesma hierarquia; sobrescrita só existe dentro de uma classe.','Sobrecarga e sobrescrita são as duas resolvidas em tempo de execução pela JVM.'],
+   e:'Sobrecarga (overloading): mesmo nome, parâmetros diferentes; o compilador escolhe pelos argumentos. Sobrescrita (overriding): mesma assinatura na subclasse; a JVM escolhe pelo objeto real.'},
+  {id:'e6', t:'Sobrecarga', o:'extra', q:'O que este código imprime?',
+   c:`static void m(int x)    { System.out.print("int"); }
+static void m(double x) { System.out.print("double"); }
+static void m(Object x) { System.out.print("Object"); }
+
+m(5);`,
+   a:['int','double','Object','Erro de compilação: chamada ambígua'],
+   e:'O compilador escolhe a sobrecarga mais específica. `5` é `int` e existe `m(int)`, então não precisa converter para `double` nem empacotar em `Integer`.'},
+  {id:'e7', t:'Sobrecarga', o:'extra', q:'Por que esta classe não compila?',
+   c:`class Calculadora {
+    int calcular(int a)    { return a * 2; }
+    double calcular(int a) { return a * 2.5; }
+}`,
+   a:['O tipo de retorno sozinho não diferencia sobrecargas.','Métodos sobrecarregados precisam ser static.','Não se pode sobrecarregar métodos que retornam números.','O segundo método deveria usar @Override.'],
+   e:'A assinatura de um método é nome + tipos dos parâmetros. Os dois são `calcular(int)`, então é o mesmo método declarado duas vezes, mesmo com retornos diferentes.'},
+  {id:'e8', t:'Polimorfismo', o:'extra', q:'O que acontece na última linha?',
+   c:`class Animal {
+    void som() { System.out.print("..."); }
+}
+class Gato extends Animal {
+    void som() { System.out.print("Miau"); }
+    void arranhar() { System.out.print("Rasg!"); }
+}
+
+Animal a = new Gato();
+a.arranhar();`,
+   a:['Erro de compilação: Animal não declara arranhar().','Imprime "Rasg!", pois o objeto real é um Gato.','Imprime "...", pois a variável é do tipo Animal.','Lança ClassCastException em tempo de execução.'],
+   e:'O tipo da variável decide o que pode ser chamado; o objeto decide qual versão roda. Para chamar `arranhar()` seria preciso um cast: `((Gato) a).arranhar()`.'},
+  {id:'e9', t:'Polimorfismo', o:'extra', q:'O que acontece com este código?',
+   c:`Animal a = new Cachorro();
+Gato g = (Gato) a;`,
+   a:['Compila, mas lança ClassCastException ao executar.','Não compila, pois Gato e Animal são tipos diferentes.','Funciona, e g passa a ser um Gato com os dados do Cachorro.','Funciona, e g recebe null porque a conversão falhou.'],
+   e:'O compilador aceita o downcast, porque um `Animal` poderia ser um `Gato`. Na execução a JVM vê que o objeto é um `Cachorro` e lança `ClassCastException`. Teste com `instanceof` antes, ou evite o cast usando polimorfismo.'},
+  {id:'e10', t:'Polimorfismo', o:'extra', q:'Qual é a utilidade da anotação `@Override`?',
+   a:['Fazer o compilador conferir se o método realmente sobrescreve outro.','Permitir sobrescrever métodos declarados como final.','Tornar o método polimórfico, o que não aconteceria sem ela.','Chamar automaticamente a versão da superclasse antes do método.'],
+   e:'Sem `@Override` a sobrescrita funciona igual, mas um erro de assinatura (como `equals(Conta o)` em vez de `equals(Object o)`) vira uma sobrecarga silenciosa. Com a anotação, o compilador acusa o erro.'},
+  {id:'e11', t:'Abstração e interfaces', o:'extra', q:'Quando faz mais sentido usar uma interface em vez de uma classe abstrata?',
+   a:['Quando classes sem relação de herança precisam cumprir o mesmo contrato.','Quando as subclasses precisam compartilhar atributos e código comum.','Quando a base precisa de um construtor que valide os atributos.','Quando se quer impedir que a classe seja estendida.'],
+   e:'Interface define um contrato que qualquer classe pode assinar, inclusive várias ao mesmo tempo (`Comparable`, `Pagavel`). Classe abstrata serve quando há estado e código comum para herdar.'},
+  {id:'e12', t:'Abstração e interfaces', o:'extra', q:'Por que esta classe não compila?',
+   c:`interface Pagavel {
+    double valor();
+}
+class Boleto implements Pagavel {
+    double valor() { return 10.0; }
+}`,
+   a:['Métodos de interface são public, e a implementação não pode reduzir a visibilidade.','Boleto deveria usar extends, e não implements.','O método valor() deveria ser abstract em Boleto.','Interfaces não podem declarar métodos com retorno.'],
+   e:'Todo método abstrato de interface é implicitamente `public`. Sem modificador, `valor()` em `Boleto` fica visível só no pacote, o que é mais restrito, e isso é proibido ao sobrescrever. Correção: `public double valor()`.'},
+  {id:'e13', t:'Abstração e interfaces', o:'extra', q:'Um atributo declarado dentro de uma interface Java é implicitamente:',
+   a:['public static final, ou seja, uma constante.','private, acessível apenas pela interface.','protected, visível nas classes que a implementam.','um atributo de instância de cada classe que a implementa.'],
+   e:'Interface não guarda estado de objeto. `int LIMITE = 10;` dentro de uma interface vira `public static final int LIMITE = 10;`.'},
+  {id:'e14', t:'Encapsulamento', o:'extra', q:'Quem enxerga um membro `protected`?',
+   a:['A própria classe, as classes do mesmo pacote e as subclasses.','Somente a própria classe e suas subclasses.','Somente as classes do mesmo pacote.','Qualquer classe do projeto.'],
+   e:'Do mais fechado ao mais aberto: `private` (só a classe), sem modificador (o pacote), `protected` (pacote + subclasses, mesmo em outros pacotes), `public` (todos).'},
+  {id:'e15', t:'Encapsulamento', o:'extra', q:'Um método declarado sem modificador de acesso (`void processar()`) é visível para:',
+   a:['Classes do mesmo pacote.','Qualquer classe do projeto.','Apenas a própria classe.','Apenas subclasses, em qualquer pacote.'],
+   e:'Sem modificador o acesso é de pacote (package-private): só classes do mesmo pacote enxergam. Uma subclasse em outro pacote não enxerga.'},
+  {id:'e16', t:'Encapsulamento', o:'extra', q:'Qual é o problema de encapsulamento neste código?',
+   c:`class Turma {
+    private List<Aluno> alunos = new ArrayList<>();
+
+    public List<Aluno> getAlunos() {
+        return alunos;
+    }
+}`,
+   a:['Quem chama pode adicionar ou remover alunos sem passar pelas regras da Turma.','A lista deveria ser public para dispensar o getter.','Getters não podem retornar coleções em Java.','O atributo deveria ser static para ser compartilhado.'],
+   e:'O `private` protege a referência, mas o getter entrega a própria lista: `turma.getAlunos().clear()` funciona. Retorne uma cópia somente leitura (`List.copyOf(alunos)`) e ofereça `matricular(aluno)` com validação.'},
+  {id:'e17', t:'static e final', o:'extra', q:'O que este código imprime?',
+   c:`class Conta {
+    static int total = 0;
+    Conta() { total++; }
+}
+
+new Conta();
+new Conta();
+new Conta();
+System.out.print(Conta.total);`,
+   a:['3','1','0','Erro de compilação'],
+   e:'Atributo `static` tem uma única cópia, compartilhada por todos os objetos da classe. Cada construtor incrementa o mesmo `total`.'},
+  {id:'e18', t:'static e final', o:'extra', q:'Qual combinação sobre `final` está correta?',
+   a:['Classe final não tem subclasses; método final não é sobrescrito; variável final não é reatribuída.','Classe final não é instanciada; método final não é sobrecarregado; variável final é static.','Classe final só tem métodos static; método final é abstrato; variável final é private.','Classe final não implementa interfaces; método final é privado; variável final só existe em interfaces.'],
+   e:'`final` quer dizer "não muda mais": classe sem subclasses (como `String`), método sem sobrescrita, variável atribuída uma única vez.'},
+  {id:'e19', t:'static e final', o:'extra', q:'Uma classe declara `static void imprimir()` e uma subclasse declara outro `static void imprimir()`. O que ocorre?',
+   a:['A subclasse oculta o método, e a versão chamada depende do tipo da referência.','A subclasse sobrescreve o método, com despacho dinâmico normal.','Erro de compilação: métodos static não podem ser redeclarados.','A JVM executa as duas versões, primeiro a da superclasse.'],
+   e:'Métodos `static` não são polimórficos. A subclasse só oculta (hiding) o método da superclasse, e a escolha acontece na compilação, pelo tipo declarado.'},
+  {id:'e20', t:'Objetos e Object', o:'extra', q:'O que este código imprime?',
+   c:`String a = new String("poo");
+String b = new String("poo");
+System.out.print((a == b) + " " + a.equals(b));`,
+   a:['false true','true true','true false','false false'],
+   e:'`==` compara referências, e são dois objetos diferentes. `equals` em `String` compara o conteúdo. Para comparar objetos, use `equals`.'},
+  {id:'e21', t:'Objetos e Object', o:'extra', q:'Ao sobrescrever `equals` em `Conta`, que outro método também deve ser sobrescrito?',
+   a:['hashCode(), para objetos iguais terem o mesmo hash.','toString(), para imprimir objetos iguais da mesma forma.','clone(), para que cópias também sejam iguais.','finalize(), para liberar objetos iguais juntos.'],
+   e:'Contrato de `Object`: se `a.equals(b)`, então `a.hashCode() == b.hashCode()`. Sem isso, `HashSet` e `HashMap` tratam contas iguais como diferentes.'},
+  {id:'e22', t:'Exceções', o:'extra', q:'Se `SaldoInsuficienteException extends Exception`, o que muda para quem chama `sacar()`?',
+   a:['Precisa tratar com try/catch ou declarar throws, senão não compila.','Nada muda: o tratamento é sempre opcional em Java.','A exceção é tratada automaticamente pela JVM.','Ela só pode ser lançada dentro de construtores.'],
+   e:'Subclasses de `Exception` que não herdam de `RuntimeException` são checked: o compilador obriga a tratar ou propagar. Se estendesse `RuntimeException`, seria unchecked e o tratamento ficaria opcional.'},
+  {id:'e23', t:'Exceções', o:'extra', q:'O que este código imprime?',
+   c:`try {
+    System.out.print("T");
+    throw new IllegalStateException();
+} catch (IllegalStateException e) {
+    System.out.print("C");
+} finally {
+    System.out.print("F");
+}`,
+   a:['TCF','TF','TC','CF'],
+   e:'Imprime T, lança a exceção, cai no `catch` (C), e o `finally` roda sempre, com ou sem exceção (F).'},
+  {id:'e24', t:'Exceções', o:'extra', q:'Qual é a diferença entre `throw` e `throws`?',
+   a:['throw lança uma exceção; throws declara na assinatura que o método pode lançá-la.','throw declara na assinatura; throws lança a exceção no corpo do método.','throw é para exceções checked; throws é para unchecked.','São sinônimos; a diferença é só de estilo.'],
+   e:'`throw new SaldoInsuficienteException()` executa o lançamento. `void sacar(double v) throws SaldoInsuficienteException` avisa quem chama que isso pode acontecer.'},
+  {id:'e25', t:'Exceções', o:'extra', q:'Qual é o problema de um `catch (Exception e) { }` vazio?',
+   a:['Esconde a falha, e o programa segue em estado inconsistente sem aviso.','Não compila, pois um catch não pode ficar vazio.','Captura apenas exceções checked e deixa passar as outras.','Faz o finally deixar de ser executado.'],
+   e:'Engolir a exceção é o pior caso: o erro aconteceu, ninguém fica sabendo e o sistema continua errado. Trate de verdade, registre ou deixe propagar.'},
+  {id:'e26', t:'Composição', o:'extra', q:'Qual par é o melhor exemplo de composição, em que a parte não existe sem o todo?',
+   a:['Pedido e seus ItemPedido.','Turma e seus Alunos.','Professor e as Disciplinas que leciona.','Cliente e o Banco onde tem conta.'],
+   e:'Item de pedido não faz sentido fora do pedido: apagou o pedido, os itens vão junto (composição). Aluno existe sem a turma (agregação); professor e disciplina apenas se relacionam (associação).'},
+  {id:'e27', t:'Herança', o:'extra', q:'`Quadrado extends Retangulo`, e `setLargura(5)` também altera a altura. Qual é o problema?',
+   a:['Código que funciona com Retangulo pode quebrar ao receber um Quadrado.','Quadrado não pode herdar porque tem menos atributos.','Os setters deveriam ser static para valer para os dois.','Não há problema: todo quadrado é um retângulo.'],
+   e:'Na matemática quadrado é retângulo, mas o comportamento não substitui: quem faz `r.setLargura(5); r.setAltura(2);` espera área 10 e recebe 4. Isso viola o Princípio de Substituição de Liskov.'},
+  {id:'e28', t:'Abstração e interfaces', o:'extra', q:'Qual declaração de método abstrato é válida em Java?',
+   a:['`abstract void desenhar();`','`abstract void desenhar() { }`','`void abstract desenhar();`','`static abstract void desenhar();`'],
+   e:'Método abstrato não tem corpo e termina em `;`. Não pode ser `static` (métodos static não são sobrescritos), e o modificador vem antes do tipo de retorno.'},
+  {id:'e29', t:'Coesão', o:'extra', q:'Qual combinação indica um bom design orientado a objetos?',
+   a:['Alta coesão e baixo acoplamento.','Alta coesão e alto acoplamento.','Baixa coesão e baixo acoplamento.','Baixa coesão e alto acoplamento.'],
+   e:'Coesão alta: cada classe faz uma coisa bem definida. Acoplamento baixo: as classes dependem pouco dos detalhes umas das outras. Assim, mudar uma parte mexe em poucas classes.'},
+  {id:'e30', t:'Pilares', o:'extra', q:'Ao modelar `Aluno` para o sistema acadêmico, você inclui matrícula e notas, mas não a cor dos olhos. Isso é um exemplo de:',
+   a:['Abstração.','Encapsulamento.','Herança.','Polimorfismo.'],
+   e:'Abstração é escolher o que é essencial para o problema e ignorar o resto. Encapsulamento é outra coisa: esconder como os dados são guardados e alterados.'},
+  {id:'e31', t:'Objetos e Object', o:'extra', q:'O que este código imprime?',
+   c:`Conta c1 = new Conta(100.0);
+Conta c2 = c1;
+c2.depositar(50.0);
+System.out.print(c1.getSaldo());`,
+   a:['150.0','100.0','50.0','Erro de compilação'],
+   e:'`c2 = c1` copia a referência, não o objeto. As duas variáveis apontam para a mesma conta, então o depósito feito por `c2` aparece em `c1`.'},
+  {id:'e32', t:'Polimorfismo', o:'extra', q:'O que este código imprime?',
+   c:`class Base {
+    String nome()  { return "Base"; }
+    String falar() { return "Sou " + nome(); }
+}
+class Filha extends Base {
+    String nome() { return "Filha"; }
+}
+
+System.out.print(new Filha().falar());`,
+   a:['Sou Filha','Sou Base','Erro de compilação','Sou BaseFilha'],
+   e:'`falar()` é herdado, mas a chamada interna `nome()` é na verdade `this.nome()`, e `this` é uma `Filha`. O despacho dinâmico vale até dentro dos métodos da superclasse.'},
+  {id:'e33', t:'Exceções', o:'extra', q:'O que acontece ao compilar este trecho? (`ler()` declara `throws IOException`)',
+   c:`try {
+    ler();
+} catch (Exception e) {
+    System.out.print("E");
+} catch (IOException e) {
+    System.out.print("IO");
+}`,
+   a:['Erro de compilação: o catch de IOException nunca seria alcançado.','Compila e imprime "IO" quando ler() lança IOException.','Compila e imprime "E" e depois "IO".','Compila, mas o segundo catch só roda se o primeiro falhar.'],
+   e:'Os `catch` são testados em ordem. `IOException` é subclasse de `Exception`, então o primeiro bloco já captura tudo, e o compilador recusa um `catch` inalcançável. Coloque sempre o mais específico antes do mais genérico.'},
+  {id:'e34', t:'Exceções', o:'extra', q:'O que este código imprime?',
+   c:`static int f() {
+    try {
+        return 1;
+    } finally {
+        System.out.print("F");
+    }
+}
+
+// no main:
+System.out.print(f());`,
+   a:['F1','1F','1','F'],
+   e:'O `finally` roda antes de o método realmente retornar, mesmo com `return` dentro do `try`. Então sai F, e só depois o `main` imprime o 1 retornado.'},
+  {id:'e35', t:'Exceções', o:'extra', q:'Qual declaração cria uma exceção personalizada unchecked que recebe uma mensagem?',
+   a:['`class SaldoInsuficienteException extends RuntimeException { SaldoInsuficienteException(String m) { super(m); } }`','`class SaldoInsuficienteException extends Exception { SaldoInsuficienteException(String m) { super(m); } }`','`class SaldoInsuficienteException implements RuntimeException { }`','`interface SaldoInsuficienteException extends Throwable { String getMessage(); }`'],
+   e:'Unchecked = herda de `RuntimeException`. O construtor repassa a mensagem com `super(m)`, e quem capturar lê com `e.getMessage()`. Herdar de `Exception` também funciona, mas cria uma exceção checked; e exceções são classes, não interfaces.'},
+  {id:'e36', t:'Exceções', o:'extra', q:'O que este código imprime?',
+   c:`static void a() {
+    b();
+    System.out.print("A");
+}
+static void b() {
+    throw new RuntimeException("falhou");
+}
+
+// no main:
+try {
+    a();
+    System.out.print("X");
+} catch (RuntimeException e) {
+    System.out.print("C");
+}`,
+   a:['C','AC','AXC','Erro de compilação: b() precisa declarar throws'],
+   e:'A exceção sobe de `b()` para `a()` e depois para o `main`, interrompendo cada método no caminho: nem A nem X são impressos. Como é `RuntimeException` (unchecked), não precisa de `throws`.'},
+  {id:'e37', t:'Encapsulamento', o:'extra', q:'O que acontece ao compilar este código? As duas classes estão no mesmo pacote.',
+   c:`class Conta {
+    private double saldo;
+}
+class Banco {
+    void zerar(Conta c) {
+        c.saldo = 0;
+    }
+}`,
+   a:['Erro de compilação: saldo é private em Conta.','Compila, porque as classes estão no mesmo pacote.','Compila, porque Banco recebe a Conta por parâmetro.','Compila, mas lança IllegalAccessException ao executar.'],
+   e:'`private` restringe ao corpo da própria classe, mesmo para classes do mesmo pacote. Se `Banco` precisa zerar a conta, `Conta` deve oferecer um método com regra para isso.'},
+  {id:'e38', t:'Encapsulamento', o:'extra', q:'Qual sequência vai do modificador de acesso mais restrito ao mais aberto?',
+   a:['private, padrão (sem modificador), protected, public','private, protected, padrão (sem modificador), public','padrão (sem modificador), private, protected, public','protected, private, padrão (sem modificador), public'],
+   e:'`private`: só a classe. Padrão: o pacote. `protected`: o pacote e as subclasses. `public`: todo mundo. O `protected` é mais aberto que o padrão porque soma as subclasses de outros pacotes.'},
+  {id:'e39', t:'Herança', o:'extra', q:'Esta subclasse compila? `Poupanca` está em outro pacote, mas estende `Conta`.',
+   c:`public class Conta {
+    protected double saldo;
+}
+
+public class Poupanca extends Conta {
+    void renderJuros() {
+        saldo = saldo * 1.01;
+    }
+}`,
+   a:['Sim: membros protected são visíveis nas subclasses, mesmo em outro pacote.','Não: protected só vale dentro do mesmo pacote.','Não: a subclasse precisa usar super.getSaldo().','Sim, mas só se saldo também fosse static.'],
+   e:'`protected` existe para liberar acesso às subclasses. O custo é enfraquecer o encapsulamento: a subclasse pode alterar o saldo sem passar por validação.'},
+  {id:'e40', t:'static e final', o:'extra', q:'O que acontece com este código?',
+   c:`class Util {
+    int dobro(int x) { return x * 2; }
+
+    public static void main(String[] args) {
+        System.out.print(dobro(4));
+    }
+}`,
+   a:['Erro de compilação: dobro() é de instância e main é static.','Imprime 8.','Imprime 0, pois não há objeto criado.','Lança NullPointerException ao executar.'],
+   e:'Dentro de `main` (static) não há objeto, então não dá para chamar `dobro()` direto. Ou crie um objeto (`new Util().dobro(4)`), ou declare `static int dobro(int x)`.'},
+  {id:'e41', t:'static e final', o:'extra', q:'Qual é a forma usual de declarar uma constante de classe em Java?',
+   a:['`public static final double TAXA = 0.05;`','`public final double TAXA;` atribuída em cada construtor','`public static double TAXA = 0.05;`','`private double TAXA = 0.05;` com getter e setter'],
+   e:'`static` faz existir uma única cópia, da classe; `final` impede reatribuir. Por convenção o nome fica em MAIÚSCULAS. Sem `final`, qualquer código poderia mudar a "constante".'},
+  {id:'e42', t:'static e final', o:'extra', q:'Quais linhas compilam?',
+   c:`final List<String> nomes = new ArrayList<>();
+nomes.add("Ana");           // linha 2
+nomes = new ArrayList<>();  // linha 3`,
+   a:['A linha 2 compila; a linha 3 dá erro.','As duas linhas dão erro, pois a lista é final.','As duas compilam, pois final só vale para tipos primitivos.','A linha 2 dá erro; a linha 3 compila.'],
+   e:'`final` numa referência impede apontar para outro objeto, mas não impede alterar o objeto apontado. Para uma lista que não muda, use `List.of(...)` ou `List.copyOf(...)`.'},
+  {id:'e43', t:'Sobrecarga', o:'extra', q:'O que este código imprime?',
+   c:`class Impressora {
+    void imprimir(Object o) { System.out.print("Object"); }
+    void imprimir(String s) { System.out.print("String"); }
+}
+
+Object x = "oi";
+new Impressora().imprimir(x);`,
+   a:['Object','String','Erro de compilação: chamada ambígua','Depende do objeto em tempo de execução'],
+   e:'A sobrecarga é escolhida na compilação, pelo tipo declarado do argumento. `x` é declarado como `Object`, então roda `imprimir(Object)`, mesmo guardando uma String. Só a sobrescrita olha o objeto real.'},
+  {id:'e44', t:'Herança', o:'extra', q:'O que este código imprime?',
+   c:`class Veiculo {
+    String descricao() { return "Veículo"; }
+}
+class Carro extends Veiculo {
+    String descricao() { return super.descricao() + " > Carro"; }
+}
+class Esportivo extends Carro {
+    String descricao() { return super.descricao() + " > Esportivo"; }
+}
+
+Veiculo v = new Esportivo();
+System.out.print(v.descricao());`,
+   a:['Veículo > Carro > Esportivo','Esportivo','Veículo','Veículo > Esportivo'],
+   e:'A chamada começa na versão de `Esportivo` (o objeto real). Cada `super.descricao()` sobe um nível e concatena o resultado, montando a cadeia de baixo para cima.'},
+  {id:'e45', t:'Abstração e interfaces', o:'extra', q:'Esta declaração de `Pato` é válida?',
+   c:`interface Voador  { void voar(); }
+interface Nadador { void nadar(); }
+
+class Pato extends Animal implements Voador, Nadador {
+    public void voar()  { System.out.print("voando"); }
+    public void nadar() { System.out.print("nadando"); }
+}`,
+   a:['Sim: uma classe estende uma classe e pode implementar várias interfaces.','Não: uma classe só pode implementar uma interface.','Não: implements deve vir antes de extends.','Não: quem estende uma classe não pode implementar interfaces.'],
+   e:'A ordem é `extends` primeiro e depois `implements`, com quantas interfaces quiser separadas por vírgula. É assim que um objeto ganha vários "papéis" mesmo com herança simples.'},
+  {id:'e46', t:'Abstração e interfaces', o:'extra', q:'O que um método `default` em uma interface permite?',
+   a:['Incluir um método com implementação sem quebrar as classes que já implementam a interface.','Declarar atributos de instância dentro da interface.','Criar objetos da interface com new.','Impedir que as classes implementadoras sobrescrevam o método.'],
+   e:'Desde o Java 8, `default void m() { ... }` dá um corpo padrão ao método. Classes antigas continuam compilando e podem sobrescrevê-lo se quiserem. A interface continua sem estado de instância e sem `new`.'},
+  {id:'e47', t:'Abstração e interfaces', o:'extra', q:'Quais linhas compilam?',
+   c:`interface Pagavel { double valor(); }
+
+class Boleto implements Pagavel {
+    public double valor() { return 10.0; }
+}
+
+Pagavel a = new Boleto();   // linha 1
+Pagavel b = new Pagavel();  // linha 2`,
+   a:['Só a linha 1.','Só a linha 2.','As duas linhas.','Nenhuma das duas.'],
+   e:'Interface não pode ser instanciada (`new Pagavel()` é erro), mas pode ser o tipo da variável. `Pagavel a = new Boleto()` é polimorfismo: a variável aceita qualquer objeto que cumpra o contrato.'},
+  {id:'e48', t:'Abstração e interfaces', o:'extra', q:'Uma classe abstrata não pode ser instanciada. Então para que serve um construtor nela?',
+   a:['Para inicializar os atributos comuns, sendo chamado pelas subclasses via super(...).','Para nada: o compilador proíbe construtores em classes abstratas.','Para permitir new na classe abstrata quando o construtor é público.','Para transformar os métodos abstratos em concretos.'],
+   e:'Quando você cria um `Circulo`, o construtor de `Forma` roda primeiro via `super(...)` e inicializa a parte comum (cor, nome). O construtor existe; só não é usado diretamente com `new Forma()`.'},
+  {id:'e49', t:'Objetos e Object', o:'extra', q:'O que este código imprime?',
+   c:`class Produto {
+    String nome;
+    int estoque;
+    boolean ativo;
+}
+
+Produto p = new Produto();
+System.out.print(p.nome + " " + p.estoque + " " + p.ativo);`,
+   a:['null 0 false','"" 0 false','Erro de compilação: atributos não inicializados','null null null'],
+   e:'Atributos recebem valores padrão: `null` para referências, `0` para números e `false` para `boolean`. Variáveis locais são diferentes: usar uma sem inicializar dá erro de compilação.'},
+  {id:'e50', t:'Objetos e Object', o:'extra', q:'O que este código imprime?',
+   c:`class Ponto {
+    int x = 1, y = 2;
+
+    @Override
+    public String toString() { return "(" + x + ", " + y + ")"; }
+}
+
+System.out.print(new Ponto());`,
+   a:['(1, 2)','Ponto@1b6d3586','Erro de compilação: print não aceita objetos','1 2'],
+   e:'`print(objeto)` chama `toString()` automaticamente. Como `Ponto` sobrescreveu o método, sai "(1, 2)". Sem a sobrescrita, sairia o padrão de `Object`, algo como `Ponto@1b6d3586`.'},
+  {id:'e51', t:'Encapsulamento', o:'extra', q:'Qual conjunto de decisões torna a classe `Dinheiro` imutável?',
+   a:['Atributos private final, sem setters, e operações que retornam um novo objeto.','Atributos public final, com getters e setters.','Atributos private static, alterados por métodos static.','Atributos protected, alterados só pelas subclasses.'],
+   e:'Imutável: depois de criado, o objeto nunca muda. `somar(outro)` devolve um novo `Dinheiro` em vez de alterar o atual, como faz a `String`. Isso evita efeitos colaterais quando o objeto é compartilhado.'},
+  {id:'e52', t:'Composição', o:'extra', q:'Qual é o problema deste design?',
+   c:`class Pilha<T> extends ArrayList<T> {
+    void empilhar(T item) { add(item); }
+    T desempilhar() { return remove(size() - 1); }
+}`,
+   a:['Pilha herda add(índice, item), get e remove de lista, que permitem furar a regra de pilha.','Classes genéricas não podem estender ArrayList.','O método desempilhar deveria ser static.','Não há problema: uma pilha é uma lista.'],
+   e:'Herdando, a `Pilha` expõe tudo de `ArrayList`, e qualquer um pode inserir no meio. Com composição (`private List<T> itens`) a pilha mostra só `empilhar` e `desempilhar`. Prefira composição quando a relação não é um é-um de verdade.'},
+  {id:'e53', t:'Encapsulamento', o:'extra', q:'Qual trecho de cliente respeita melhor o encapsulamento de `Conta`?',
+   a:['`conta.sacar(valor);`','`if (conta.getSaldo() >= valor) conta.setSaldo(conta.getSaldo() - valor);`','`conta.saldo -= valor;`','`Conta.saldo = Conta.saldo - valor;`'],
+   e:'"Diga, não pergunte": em vez de puxar o dado, decidir fora e devolver, peça à conta que faça a operação. A regra fica dentro de `Conta`, num lugar só, e não espalhada pelos clientes.'}
+];
+
+const POR_ID = Object.fromEntries(QUESTOES.map(q => [q.id, q]));
+const TEMAS = [...new Set(QUESTOES.map(q => q.t))].sort((a, b) => a.localeCompare(b, 'pt'));
+const N_PROF = QUESTOES.filter(q => q.o === 'prof').length;
+const N_EXTRA = QUESTOES.length - N_PROF;
+
+// ---------- armazenamento local (só conveniência; o jogo funciona sem) ----------
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('fpoo.' + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('fpoo.' + k, JSON.stringify(v)); } catch(e){} }
+};
+let recordes = store.get('recordes', {});
+let erros = new Set(store.get('erros', []));
+let somLigado = store.get('som', true);
+const corSalva = store.get('cor', null);
+if (corSalva) document.documentElement.setAttribute('data-theme', corSalva);
+
+const MODOS = {
+  prof:    {nome:'Lista do professor', tint:'var(--java-soft)', tag:'Aula de Revisão', desc:'As ' + N_PROF + ' questões do quiz da Aula de Revisão da Prova 1, com a explicação de cada resposta.', base:q => q.o === 'prof'},
+  extra:   {nome:'Questões extras', tint:'var(--blue-soft)', tag:'pegadinhas', desc:'Código para prever a saída, construtores, sobrecarga, interfaces, modificadores e exceções.', base:q => q.o === 'extra'},
+  maratona:{nome:'Maratona', tint:'var(--gold-soft)', tag:'tudo junto', desc:'Todas as questões embaralhadas. Acertos seguidos multiplicam os pontos.', base:() => true},
+  sobrev:  {nome:'Sobrevivência', tint:'var(--bad-soft)', tag:'3 cafés · 25 s', desc:'Errou ou o tempo acabou, perde um café. Responder rápido dá bônus.', base:() => true, vidas:3, tempo:25},
+  erros:   {nome:'Revisar erros', tint:'var(--ok-soft)', tag:'seus erros', desc:'Só as questões que você já errou. Acertou, ela sai da lista.', base:q => erros.has(q.id)}
+};
+
+let S = {tela:'menu', tema:'Todos'};
+const app = document.getElementById('app');
+
+// ---------- utilidades ----------
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmt(s){ return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>'); }
+function hl(src){
+  const re = /(\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*")|\b(class|extends|implements|interface|abstract|static|final|void|int|double|boolean|new|return|private|public|protected|try|catch|finally|throw|throws|super|this|if|else|for|default)\b|\b([A-Z][A-Za-z0-9_]*)\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    if (m[1]) out += '<span class="c-com">' + esc(m[1]) + '</span>';
+    else if (m[2]) out += '<span class="c-str">' + esc(m[2]) + '</span>';
+    else if (m[3]) out += '<span class="c-kw">' + m[3] + '</span>';
+    else out += '<span class="c-tipo">' + m[4] + '</span>';
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+function embaralhar(arr){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function pool(modo, tema){ return QUESTOES.filter(q => MODOS[modo].base(q) && (tema === 'Todos' || q.t === tema)); }
+function multiplicador(seq){ return seq >= 10 ? 4 : seq >= 6 ? 3 : seq >= 3 ? 2 : 1; }
+function atual(){ return POR_ID[S.fila[S.i]]; }
+function num(n){ return n.toLocaleString('pt-BR'); }
+function patente(pct){
+  if (pct >= 90) return 'Arquiteto de Classes';
+  if (pct >= 75) return 'Dev Sênior do Polimorfismo';
+  if (pct >= 60) return 'Dev Júnior Encapsulado';
+  if (pct >= 40) return 'Estagiário em Herança';
+  return 'NullPointerException ambulante';
+}
+const CAFE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="currentColor"/><path d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 2.5c-1 1.5 1 2.5 0 4M12 2.5c-1 1.5 1 2.5 0 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+// ---------- som ----------
+let ac = null;
+function som(tipo){
+  if (!somLigado) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const notas = tipo === 'ok' ? [660, 880] : tipo === 'erro' ? [220, 150] : [523, 659, 784, 1047];
+    notas.forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = tipo === 'erro' ? 'sawtooth' : 'square';
+      o.frequency.value = f;
+      const t = ac.currentTime + i * 0.09;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + 0.15);
+    });
+  } catch(e){}
+}
+
+// ---------- tempo (modo sobrevivência) ----------
+let timerId = null, prazo = 0;
+function pararTempo(){ if (timerId){ clearInterval(timerId); timerId = null; } }
+function prepararTempo(){
+  pararTempo();
+  const t = MODOS[S.modo] && MODOS[S.modo].tempo;
+  if (!t) return;
+  prazo = performance.now() + t * 1000;
+  timerId = setInterval(tick, 100);
+}
+function restante(){ return Math.max(0, (prazo - performance.now()) / 1000); }
+function tick(){
+  const t = MODOS[S.modo].tempo, r = restante();
+  const barra = document.getElementById('tempoBarra'), txt = document.getElementById('tempoTxt');
+  if (barra){ barra.style.width = (r / t * 100) + '%'; barra.classList.toggle('urgente', r < 6); }
+  if (txt) txt.textContent = Math.ceil(r) + ' s';
+  if (r <= 0) responder(-1);
+}
+
+// ---------- fluxo do jogo ----------
+function iniciar(modo){
+  const lista = pool(modo, S.tema);
+  if (!lista.length) return;
+  const m = MODOS[modo];
+  S = {tela:'jogo', tema:S.tema, modo, fila:embaralhar(lista.map(q => q.id)), i:0, ordem:embaralhar([0,1,2,3]),
+       escolha:null, pontos:0, seq:0, melhorSeq:0, vidas:m.vidas || 0, respostas:[], ganho:0, mult:1};
+  prepararTempo();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function responder(k){
+  if (S.tela !== 'jogo' || S.escolha !== null) return;
+  const m = MODOS[S.modo];
+  const bonusTempo = m.tempo ? Math.ceil(restante()) * 4 : 0;
+  pararTempo();
+  const q = atual();
+  const ok = k >= 0 && S.ordem[k] === 0;
+  S.escolha = k;
+  if (ok){
+    S.seq++;
+    S.melhorSeq = Math.max(S.melhorSeq, S.seq);
+    S.mult = multiplicador(S.seq);
+    S.ganho = 100 * S.mult + bonusTempo;
+    S.pontos += S.ganho;
+    erros.delete(q.id);
+  } else {
+    S.seq = 0; S.mult = 1; S.ganho = 0;
+    erros.add(q.id);
+    if (m.vidas) S.vidas--;
+  }
+  S.respostas.push({id:q.id, ok});
+  store.set('erros', [...erros]);
+  som(ok ? 'ok' : 'erro');
+  render();
+  const saida = document.getElementById('saida');
+  if (saida) saida.scrollIntoView({block:'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  const prox = document.getElementById('btnProx');
+  if (prox) prox.focus({preventScroll:true});
+}
+
+function acabou(){
+  const m = MODOS[S.modo];
+  if (m.vidas) return S.vidas <= 0;
+  return S.i + 1 >= S.fila.length;
+}
+
+function proxima(){
+  if (S.tela !== 'jogo' || S.escolha === null) return;
+  if (acabou()) return finalizar();
+  S.i++;
+  if (S.i >= S.fila.length){
+    // sobrevivência recicla o banco quando ele acaba
+    const ultimo = S.fila[S.fila.length - 1];
+    let nova = embaralhar(pool(S.modo, S.tema).map(q => q.id));
+    if (nova.length > 1 && nova[0] === ultimo) nova.push(nova.shift());
+    S.fila = S.fila.concat(nova);
+  }
+  S.ordem = embaralhar([0,1,2,3]);
+  S.escolha = null; S.ganho = 0;
+  prepararTempo();
+  render();
+  const topo = document.getElementById('questao');
+  if (topo) topo.scrollIntoView({block:'nearest'});
+  if (document.activeElement) document.activeElement.blur();
+}
+
+function finalizar(){
+  pararTempo();
+  if (!S.respostas.length){ irMenu(); return; }
+  const anterior = recordes[S.modo] || 0;
+  S.recordeAnterior = anterior;
+  S.novoRecorde = S.pontos > anterior;
+  if (S.novoRecorde){ recordes[S.modo] = S.pontos; store.set('recordes', recordes); }
+  S.tela = 'fim';
+  som('fim');
+  render();
+  window.scrollTo(0, 0);
+}
+
+function irMenu(){ pararTempo(); S = {tela:'menu', tema:S.tema}; render(); window.scrollTo(0, 0); }
+
+// ---------- telas ----------
+function telaMenu(){
+  const opcoesTema = ['Todos'].concat(TEMAS).map(t => {
+    const n = t === 'Todos' ? QUESTOES.length : QUESTOES.filter(q => q.t === t).length;
+    return '<option value="' + esc(t) + '"' + (t === S.tema ? ' selected' : '') + '>' + esc(t) + ' (' + n + ')</option>';
+  }).join('');
+  const cards = Object.keys(MODOS).map(id => {
+    const m = MODOS[id], n = pool(id, S.tema).length, rec = recordes[id];
+    let qtd = id === 'sobrev' ? 'até zerar os cafés' : n + (n === 1 ? ' questão' : ' questões');
+    if (id === 'erros' && !n) qtd = erros.size ? 'nenhum erro neste tema' : 'nenhum erro ainda';
+    return '<button class="modo' + (id === 'prof' ? ' destaque' : '') + '" data-modo="' + id + '"' + (n ? '' : ' disabled') + ' style="--tint:' + m.tint + '">' +
+      '<span class="modo-nome"><b>' + m.nome + '</b><small>' + m.tag + '</small></span>' +
+      '<span class="modo-desc">' + m.desc + '</span>' +
+      '<span class="modo-meta"><span>' + qtd + '</span><span>recorde ' + (rec ? num(rec) + ' pts' : '—') + '</span></span>' +
+    '</button>';
+  }).join('');
+  return '<header class="topo">' +
+      '<h1 class="logo"><span class="l1">Fliperama</span><span class="l2">do <b>POO</b></span></h1>' +
+      '<p class="sub">Revisão gamificada para a Prova 1 de Programação Orientada a Objetos em Java: ' + N_PROF + ' questões da Aula de Revisão e ' + N_EXTRA + ' extras, todas com explicação.</p>' +
+    '</header>' +
+    '<div class="ferramentas">' +
+      '<label for="selTema">Tema</label><select id="selTema">' + opcoesTema + '</select>' +
+      '<button class="mini" data-acao="som" aria-pressed="' + somLigado + '">Som: ' + (somLigado ? 'ligado' : 'desligado') + '</button>' +
+      '<button class="mini" data-acao="cor">◐ Claro/escuro</button>' +
+    '</div>' +
+    '<div class="modos">' + cards + '</div>' +
+    '<p class="rodape">Teclado: <kbd>1</kbd>–<kbd>4</kbd> ou <kbd>A</kbd>–<kbd>D</kbd> responde, <kbd>Enter</kbd> avança.</p>';
+}
+
+function telaJogo(){
+  const m = MODOS[S.modo], q = atual();
+  const respondida = S.escolha !== null;
+  const certaK = S.ordem.indexOf(0);
+  const ok = respondida && S.escolha === certaK;
+  const pos = S.i + 1;
+  const contador = m.vidas ? 'questão ' + pos + ' · ' + S.respostas.filter(r => r.ok).length + ' acertos'
+                           : pos + ' de ' + S.fila.length;
+  const pct = m.vidas ? 100 : (S.i + (respondida ? 1 : 0)) / S.fila.length * 100;
+  const multAtual = respondida ? S.mult : multiplicador(S.seq + 1);
+  const cafes = m.vidas ? '<span class="cafes" aria-label="' + S.vidas + ' cafés restantes">' +
+    Array.from({length:m.vidas}, (_, i) => '<span class="cafe' + (i < S.vidas ? '' : ' perdido') + '">' + CAFE + '</span>').join('') + '</span>' : '';
+
+  let html = '<div class="hud-wrap">' +
+    '<div class="hud">' +
+      '<button class="mini" data-acao="encerrar">✕ Encerrar</button>' +
+      '<div class="hud-info"><b>' + m.nome + '</b><span>' + contador + '</span></div>' +
+      '<div class="hud-dir">' + cafes +
+        '<span class="combo' + (multAtual > 1 ? ' on' : '') + '" title="Multiplicador do próximo acerto">x' + multAtual + '</span>' +
+        '<span class="pontos' + (respondida && ok ? ' bump' : '') + '" aria-label="pontos">' + num(S.pontos) + '</span>' +
+      '</div>' +
+    '</div>' +
+    (m.vidas ? '' : '<div class="trilho"><i style="width:' + pct + '%"></i></div>') +
+    (m.tempo ? '<div class="tempo"><div class="barra"><i id="tempoBarra"' + (respondida ? ' style="width:0%"' : '') + '></i></div><span id="tempoTxt">' + (respondida ? '—' : m.tempo + ' s') + '</span></div>' : '') +
+  '</div>';
+
+  html += '<article class="uml q' + (respondida ? (ok ? ' acertou' : ' errou') : '') + '" id="questao">' +
+    '<header class="uml-nome"><span class="estereo">«' + esc(q.t) + '»</span>' +
+      '<span class="chip' + (q.o === 'prof' ? ' prof' : '') + '">' + (q.o === 'prof' ? 'Lista do prof · ' + q.id.slice(1) : 'Extra') + '</span></header>' +
+    '<div class="uml-corpo">' +
+      '<p class="enunciado">' + fmt(q.q) + '</p>' +
+      (q.c ? '<pre class="codigo"><code>' + hl(q.c) + '</code></pre>' : '') +
+    '</div>' +
+    '<ol class="opcoes">' + S.ordem.map((src, k) => {
+      let cls = '';
+      if (respondida){ cls = k === certaK ? ' certa' : k === S.escolha ? ' errada' : ' apagada'; }
+      return '<li><button class="op' + cls + '" data-op="' + k + '"' + (respondida ? ' disabled' : '') + '>' +
+        '<span class="letra">' + 'ABCD'[k] + '</span><span class="txt">' + fmt(q.a[src]) + '</span></button></li>';
+    }).join('') + '</ol>' +
+  '</article>';
+
+  if (respondida){
+    const linha = S.i + 1;
+    const fim = acabou();
+    let cons = '<div><span class="prompt">$</span> javac Resposta.java</div>';
+    if (ok){
+      cons += '<div class="verde">BUILD SUCCESSFUL · +' + num(S.ganho) + ' pts' + (S.mult > 1 ? ' (combo x' + S.mult + ')' : '') + '</div>';
+      if (S.seq >= 3) cons += '<div class="dica">' + S.seq + ' acertos seguidos.</div>';
+    } else {
+      cons += '<div class="vermelho">Resposta.java:' + linha + ': error: ' + (S.escolha < 0 ? 'tempo esgotado' : 'alternativa incorreta') + '</div>' +
+              '<div class="dica">  resposta certa: ' + 'ABCD'[certaK] + ')' + (m.vidas ? '\n  cafés restantes: ' + S.vidas : '') + '</div>';
+    }
+    html += '<section class="saida" id="saida">' +
+      '<div class="console" role="status">' + cons + '</div>' +
+      '<div class="porque"><h3>Por quê</h3><p>' + fmt(q.e) + '</p></div>' +
+      '<button class="btn" id="btnProx" data-acao="proxima">' + (fim ? 'Ver resultado' : 'Próxima') + ' →</button>' +
+    '</section>';
+  }
+  return html;
+}
+
+function telaFim(){
+  const m = MODOS[S.modo];
+  const total = S.respostas.length, acertos = S.respostas.filter(r => r.ok).length;
+  const pct = total ? Math.round(acertos / total * 100) : 0;
+  const recorde = Math.max(S.pontos, S.recordeAnterior || 0);
+
+  const porTema = {};
+  S.respostas.forEach(r => { const t = POR_ID[r.id].t; porTema[t] = porTema[t] || {a:0, n:0}; porTema[t].n++; if (r.ok) porTema[t].a++; });
+  const linhasTema = Object.keys(porTema).sort((a, b) => (porTema[a].a / porTema[a].n) - (porTema[b].a / porTema[b].n)).map(t => {
+    const p = porTema[t], v = p.a / p.n;
+    const cor = v >= .75 ? 'var(--ok)' : v >= .5 ? 'var(--gold)' : 'var(--bad)';
+    return '<li><span class="nm">' + esc(t) + '</span><span class="bar"><i style="width:' + (v * 100) + '%;background:' + cor + '"></i></span><span class="v">' + p.a + '/' + p.n + '</span></li>';
+  }).join('');
+
+  const errados = [...new Set(S.respostas.filter(r => !r.ok).map(r => r.id))];
+  const revisao = errados.length ? errados.map(id => {
+    const q = POR_ID[id];
+    return '<details><summary>' + fmt(q.q) + '</summary><div class="det">' +
+      (q.c ? '<pre class="codigo"><code>' + hl(q.c) + '</code></pre>' : '') +
+      '<p><span class="certo">Resposta:</span> ' + fmt(q.a[0]) + '</p><p>' + fmt(q.e) + '</p></div></details>';
+  }).join('') : '<p class="vazio">Nenhum erro nesta partida.</p>';
+
+  return '<article class="uml fim">' +
+      '<header class="uml-nome"><span class="estereo">«resultado»</span><h2>' + (m.vidas ? 'Acabou o café!' : m.nome) + '</h2></header>' +
+      '<div class="uml-corpo">' +
+        '<p class="rank-label">Sua patente</p>' +
+        '<p class="rank">' + patente(pct) + '</p>' +
+        '<p class="placar">' + num(S.pontos) + ' <small>pts</small></p>' +
+        (S.novoRecorde ? '<span class="novo">Novo recorde!</span>' : '') +
+        '<dl class="stats">' +
+          '<div><dt>Acertos</dt><dd>' + acertos + '/' + total + '</dd></div>' +
+          '<div><dt>Aproveitamento</dt><dd>' + pct + '%</dd></div>' +
+          '<div><dt>Maior sequência</dt><dd>' + S.melhorSeq + '</dd></div>' +
+          '<div><dt>Recorde</dt><dd>' + num(recorde) + '</dd></div>' +
+        '</dl>' +
+      '</div>' +
+    '</article>' +
+    '<section class="painel"><h3>Desempenho por tema</h3><ul class="temas">' + linhasTema + '</ul></section>' +
+    '<section class="painel"><h3>Para revisar (' + errados.length + ')</h3><div class="revisao">' + revisao + '</div></section>' +
+    '<div class="acoes">' +
+      '<button class="btn" data-acao="denovo">Jogar de novo</button>' +
+      (erros.size ? '<button class="btn ghost" data-acao="revisar">Revisar erros (' + erros.size + ')</button>' : '') +
+      '<button class="btn ghost" data-acao="menu">Menu</button>' +
+    '</div>';
+}
+
+function render(){
+  app.innerHTML = S.tela === 'jogo' ? telaJogo() : S.tela === 'fim' ? telaFim() : telaMenu();
+}
+
+// ---------- eventos ----------
+app.addEventListener('click', e => {
+  const alvo = e.target.closest('button');
+  if (!alvo || alvo.disabled) return;
+  if (alvo.dataset.modo) return iniciar(alvo.dataset.modo);
+  if (alvo.dataset.op !== undefined) return responder(Number(alvo.dataset.op));
+  switch (alvo.dataset.acao){
+    case 'proxima': return proxima();
+    case 'encerrar': return S.respostas && S.respostas.length ? finalizar() : irMenu();
+    case 'menu': return irMenu();
+    case 'denovo': return iniciar(S.modo);
+    case 'revisar': S.tema = 'Todos'; return iniciar('erros');
+    case 'som': somLigado = !somLigado; store.set('som', somLigado); render(); return;
+    case 'cor': {
+      const raiz = document.documentElement;
+      const escuro = raiz.getAttribute('data-theme') ? raiz.getAttribute('data-theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      const nova = escuro ? 'light' : 'dark';
+      raiz.setAttribute('data-theme', nova); store.set('cor', nova);
+      return;
+    }
+  }
+});
+app.addEventListener('change', e => {
+  if (e.target.id === 'selTema'){ S.tema = e.target.value; render(); document.getElementById('selTema').focus(); }
+});
+document.addEventListener('keydown', e => {
+  if (S.tela !== 'jogo' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target.tagName;
+  if (tag === 'SELECT' || tag === 'INPUT') return;
+  if (S.escolha === null){
+    const k = '1234'.indexOf(e.key) >= 0 ? '1234'.indexOf(e.key) : 'abcd'.indexOf(e.key.toLowerCase());
+    if (k >= 0 && e.key.length === 1){ e.preventDefault(); responder(k); }
+  } else if ((e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') && tag !== 'BUTTON'){
+    e.preventDefault(); proxima();
+  } else if (e.key === 'ArrowRight'){
+    e.preventDefault(); proxima();
+  }
+});
+
+// ---------- início (preserva a partida em atualizações da página) ----------
+try { window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(() => ({S})); } catch(e){}
+function boot(data){
+  if (data && data.S && data.S.tela){
+    S = data.S;
+    if (S.tela === 'jogo' && !POR_ID[S.fila && S.fila[S.i]]) S = {tela:'menu', tema:'Todos'};
+  }
+  if (S.tela === 'jogo' && S.escolha === null) prepararTempo();
+  render();
+}
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
+else boot((window.claude && window.claude.hot && window.claude.hot.data) || {});
+</script>
+</body>
+</html>
